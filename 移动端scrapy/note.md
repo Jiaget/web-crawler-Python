@@ -3,7 +3,7 @@
 ### 需要抓包工具
 
 - fiddler
-- miteproxy
+- miteproxy （暂不了解）
 
 ### Fiddle 相关配置
 - tools - connection - allow remote
@@ -36,10 +36,26 @@
     - 不输出日志 `--nolog` 或者 settings.py -> 增加 `LOG_LEVEL = 'ERROR'`
   - 持久化（两种）
     - 终端：
-        - 只可以将parse返回值存在本地文件(不能存数据库，只能存储进限定文件) 
-        - `scrapy crawl $spiderName -o $filePath`
+      - 只可以将parse返回值存在本地文件(不能存数据库，只能存储进限定文件) 
+      - `scrapy crawl $spiderName -o $filePath`
       
-    - 管道：
-        - 较为繁琐
+    - 管道：（较繁琐）
+      - 数据解析
+      - 定义一个item类型对象。 items.py -> item类型对象。 `name = items.Field() # 这是一个万能类型`
+      - 数据封装到该对象中
+      ```
+      from $projectName.items import XXXItem
+    
+      item = xxxItem()
+      item['name'] = xxx
+      # item提交给管道，提交给了优先级最高的管道类
+      yield item
+      ```
+      - pipelines.py： 接收爬虫文件的item。并进行任意形式的持久化存储
+      - 重写父类的方法
+        - `def open_spider(self, spider):`在开始爬虫的时候，打开写入的文件
+        - `def close_spider(self, spider):`在结束爬虫的时候，关闭文件
+      - 在settings.py 中开启管道（默认参数300代表优先级，数值越小，优先级越大）
+      - pipeline 中return 的item 会根据优先级传递给下一个pipline
         
   
