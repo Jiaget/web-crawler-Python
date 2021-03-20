@@ -57,5 +57,47 @@
         - `def close_spider(self, spider):`在结束爬虫的时候，关闭文件
       - 在settings.py 中开启管道（默认参数300代表优先级，数值越小，优先级越大）
       - pipeline 中return 的item 会根据优先级传递给下一个pipline
+  
+  - 手动发get请求:`yield scrapy.Request(url, callback)` get请求
+  - 手动发post请求：
+    ```
+    data = {}
+    yield scrapy.FormRequest(url, formdata=data, callback)
+    ```
+### Scrapy五大核心组件的工作流程
+ 调度器、管道、、、spider
+- 引擎：（scrapy）
+  - 进行数据流的处理（收发数据）
+  - 触发事务（核心）
+- 调度器：(scheduler)
+  - 过滤器：去重
+  - 队列：接收引擎发送来的数据，等待数据请求时发送回引擎。
+
+- 下载器(downloader)
+  - 建立在Twisted模型之上,异步的主要体现地方
+  - 下载网页内容
+- 爬虫：（spiders）
+  - 从网页中提取自己需要的信息（item）.
+  - 也可提取链接并让scrapy继续抓取下一个页面
+- 管道(pipeline):
+  - 处理爬虫抽取的item：
+    - 持久化
+    - 验证有效性
+    - 清楚不必要信息
+  - 再次发送回管道
+  
+
+------
+# Scrapy的一些应用
+
+## 1.爬取图片
+
+## 2. 中间件：selenium + scrapy
+
+
+  
+
+  
+
         
   
