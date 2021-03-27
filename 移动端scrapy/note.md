@@ -91,8 +91,70 @@
 # Scrapy的一些应用
 
 ## 1.爬取图片
+  - 建议使用管道对图片发请求
+  ```
+  from scrapy.pipelines.images import ImagesPipeline
+  class XXXPipeline(ImagesPipeline):
+  
+    # 1.对媒体资源发送请求
+    # item是spider发送过来的
+    def get_media_requests(selft, item, info):
+      yield scrapy.Request(item['url'])
+      
+    # 2.指定数据存储名
+    def file_path(self, request, respons=None, info=None):
+      return = request.url.spilt('/')[-1]
+    
+    # 3.将item传递贵下一个管道类
+    def item_completed(self, requests, item, info):
+      
+  ```
+  - 存放路径在sttings.py中设置`IMAGES_STORE = './imageLib'`
 
-## 2. 中间件：selenium + scrapy
+## 2.效率提升
+  - **<u>增加并发</u>**：
+    - 默认scrapy开启的并发线程为32个，可以适当进行增加。在settings配置文件中修改`CONCURRENT_REQUESTS = 100`值为100,并发设置成了为100。
+
+  - **<u>降低日志级别</u>**：
+      - 在运行scrapy时，会有大量日志信息的输出，为了减少CPU的使用率。可以设置log输出信息为`INFO`或者`ERROR`即可。在配置文件中编写：`LOG_LEVEL = ‘INFO’`
+  
+  - **<u>禁止cookie</u>**：
+      - 如果不是真的需要cookie，则在scrapy爬取数据时可以禁止cookie从而减少CPU的使用率，提升爬取效率。在配置文件中编写：`COOKIES_ENABLED = False`
+  
+  - **<u>禁止重试</u>**：
+      - 对失败的HTTP进行重新请求（重试）会减慢爬取速度，因此可以禁止重试。在配置文件中编写：`RETRY_ENABLED = False`
+  
+  - **<u>减少下载超时</u>**：
+      - 如果对一个非常慢的链接进行爬取，减少下载超时可以能让卡住的链接快速被放弃，从而提升效率。在配置文件中进行编写：`DOWNLOAD_TIMEOUT = 10` 超时时间为10s
+
+## 3.深度爬取和请求传参
+  深度爬取即爬取多个层级页面数据
+  - 手动发送请求并传递item`yield scrapy.Request(url, callback, meta = {'item': item})`
+  - callback中接收： `item = response.meta['item']`
+
+## 3. 中间件：
+  - 爬虫中间件：
+  - 下载中间件：
+    - 批量拦截请求和响应。
+    - 拦截请求：
+      - ua伪装。
+      - 代理操作。
+    - 拦截响应：
+      - 篡改响应数据或者替代
+## 4.selenium + scrapy
+## 5.CrawlSpider 全站爬取
+- Spider的一个子类
+
+- 流程
+  - 创建基于CrawlSpider的文件：`scrapy genspider -t crawl spiderName www.xxx.com`
+  - 实例化一个Rule(规则解析器) `Rule(LinkExtractor(allow=r' Items/), callback= 'parse_item', follow=True'`
+    - link: 链接提取器：
+      - 根据制定规则对制定的链接来进行提取： `allow = '正则表达式`
+    - 规则提取：
+      - 根据规则对请求到的页面源码进行数据解析
+      - follow=True: 将链接提取器，继续作用到提取到的链接的页面中。
+    - 注意： 链接提取器和规则提取器是一对一的
+
 
 
   
